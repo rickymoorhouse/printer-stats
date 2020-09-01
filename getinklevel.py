@@ -2,7 +2,7 @@ import requests
 import logging
 import xmltodict
 import graphiteQueue
-
+import os
 
 printer_host = os.getenv('PRINTER_HOST')
 graphite = graphiteQueue.graphite(prefix='printer')
@@ -28,6 +28,8 @@ for t in usage['pudyn:ProductUsageDyn']['pudyn:PrinterSubunit']['pudyn:UsageByMe
         graphite.stage('pages.{}'.format(t['dd:MediaSizeName']), float(t['dd:TotalImpressions']['#text']))
 for c in usage['pudyn:ProductUsageDyn']['pudyn:ConsumableSubunit']['pudyn:Consumable']:
     label = c['dd:MarkerColor'].lower()
+    if label == "cyanmagentayellow":
+        label = 'colour'
     graphite.stage('{}.ink-remaining'.format(label), float(c['dd:ConsumableRawPercentageLevelRemaining']))
     graphite.stage('{}.cumulative-cartridges'.format(label), float(c['dd2:CumulativeConsumableCount']))
     graphite.stage('{}.cumulative-microlitres'.format(label), float(c['dd2:CumulativeMarkingAgentUsed']['dd:ValueFloat']))
